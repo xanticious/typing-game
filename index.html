@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Protector Typing Master</title>
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/menu.css" />
+    <link rel="stylesheet" href="css/game.css" />
+    <link rel="stylesheet" href="css/themes.css" />
+  </head>
+  <body>
+    <!-- Main Menu Screen -->
+    <div id="mainMenu" class="screen active">
+      <div class="menu-container">
+        <h1 class="game-title">🐍 Snake Protector Typing Master 🧙‍♂️</h1>
+
+        <div class="menu-section">
+          <h3>Character Sets:</h3>
+          <div class="combobox-container">
+            <div class="multi-select-combobox" id="characterSetsCombobox">
+              <div class="combobox-display" tabindex="0">
+                <span class="selected-text">Lowercase letters (a-z)</span>
+                <span class="dropdown-arrow">▼</span>
+              </div>
+              <div class="combobox-dropdown">
+                <div class="combobox-option" data-value="lowercase">
+                  <input type="checkbox" id="lowercase" checked />
+                  <label for="lowercase">Lowercase letters (a-z)</label>
+                </div>
+                <div class="combobox-option" data-value="uppercase">
+                  <input type="checkbox" id="uppercase" />
+                  <label for="uppercase">Uppercase letters (A-Z)</label>
+                </div>
+                <div class="combobox-option" data-value="numbers">
+                  <input type="checkbox" id="numbers" />
+                  <label for="numbers">Numbers (0-9)</label>
+                </div>
+                <div class="combobox-option" data-value="symbols">
+                  <input type="checkbox" id="symbols" />
+                  <label for="symbols"
+                    >Symbols (~!@#$%^&*()_-+={[}]|\:;"'&lt;,&gt;.?/)</label
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <h3>Difficulty (Speed):</h3>
+          <div class="combobox-container">
+            <div
+              class="single-select-combobox"
+              id="difficultyCombobox"
+              tabindex="0"
+            >
+              <div class="combobox-display">
+                <span class="display-text">Medium (~40 WPM)</span>
+                <span class="dropdown-arrow">▼</span>
+              </div>
+              <div class="combobox-dropdown">
+                <div class="combobox-option" data-value="slowest">
+                  Slowest (~10 WPM)
+                </div>
+                <div class="combobox-option" data-value="slower">
+                  Slower (~20 WPM)
+                </div>
+                <div class="combobox-option" data-value="slow">
+                  Slow (~30 WPM)
+                </div>
+                <div class="combobox-option selected" data-value="medium">
+                  Medium (~40 WPM)
+                </div>
+                <div class="combobox-option" data-value="fast">
+                  Fast (~50 WPM)
+                </div>
+                <div class="combobox-option" data-value="faster">
+                  Faster (~60 WPM)
+                </div>
+                <div class="combobox-option" data-value="fastest">
+                  Fastest (~70 WPM)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-section">
+          <h3>Time Duration:</h3>
+          <div class="combobox-container">
+            <div
+              class="single-select-combobox"
+              id="durationCombobox"
+              tabindex="0"
+            >
+              <div class="combobox-display">
+                <span class="display-text">Medium (40 seconds)</span>
+                <span class="dropdown-arrow">▼</span>
+              </div>
+              <div class="combobox-dropdown">
+                <div class="combobox-option" data-value="shortest">
+                  Shortest (10 seconds)
+                </div>
+                <div class="combobox-option" data-value="shorter">
+                  Shorter (20 seconds)
+                </div>
+                <div class="combobox-option" data-value="short">
+                  Short (30 seconds)
+                </div>
+                <div class="combobox-option selected" data-value="medium">
+                  Medium (40 seconds)
+                </div>
+                <div class="combobox-option" data-value="long">
+                  Long (50 seconds)
+                </div>
+                <div class="combobox-option" data-value="longer">
+                  Longer (60 seconds)
+                </div>
+                <div class="combobox-option" data-value="extraLong">
+                  Extra Long (120 seconds)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="best-score-display">
+          <p id="bestScoreText">Best score today: No data</p>
+        </div>
+
+        <div class="menu-buttons">
+          <button id="startGameBtn" class="btn btn-primary" disabled>
+            Start Game
+          </button>
+          <button id="viewStatsBtn" class="btn btn-secondary">
+            View Statistics
+          </button>
+        </div>
+
+        <div class="validation-message" id="validationMessage">
+          Please select at least one character set to continue.
+        </div>
+      </div>
+
+      <!-- Fullscreen Toggle Button -->
+      <button
+        id="fullscreenToggleMenu"
+        class="fullscreen-btn"
+        title="Toggle Fullscreen"
+      >
+        <span class="fullscreen-icon">⛶</span>
+      </button>
+    </div>
+
+    <!-- Statistics Screen -->
+    <div id="statisticsMenu" class="screen">
+      <div class="menu-container">
+        <h2>📊 Session Statistics</h2>
+
+        <div class="stats-table-container">
+          <table id="statsTable" class="stats-table">
+            <thead>
+              <tr>
+                <th>Character Sets</th>
+                <th>Difficulty</th>
+                <th>Duration</th>
+                <th>Best WPM</th>
+                <th>Mistakes</th>
+              </tr>
+            </thead>
+            <tbody id="statsTableBody">
+              <!-- Statistics will be populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="menu-buttons">
+          <button id="backToMenuBtn" class="btn btn-secondary">
+            Back to Main Menu
+          </button>
+        </div>
+      </div>
+
+      <!-- Fullscreen Toggle Button -->
+      <button
+        id="fullscreenToggleStats"
+        class="fullscreen-btn"
+        title="Toggle Fullscreen"
+      >
+        <span class="fullscreen-icon">⛶</span>
+      </button>
+    </div>
+
+    <!-- Game Arena Screen -->
+    <div id="gameArena" class="screen">
+      <div class="game-container">
+        <div class="game-ui">
+          <div class="game-stats">
+            <span>WPM: <span id="currentWPM">0</span></span>
+            <span>Mistakes: <span id="currentMistakes">0</span></span>
+            <span>Letters Left: <span id="lettersLeft">0</span></span>
+          </div>
+        </div>
+
+        <!-- Fullscreen Toggle Button -->
+        <button
+          id="fullscreenToggle"
+          class="fullscreen-btn"
+          title="Toggle Fullscreen"
+        >
+          <span class="fullscreen-icon">⛶</span>
+        </button>
+
+        <canvas id="gameCanvas" width="800" height="600">
+          Your browser does not support the HTML5 canvas element.
+        </canvas>
+
+        <div class="typing-feedback" id="typingFeedback">
+          <!-- Dynamic feedback messages -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="resultsScreen" class="screen">
+      <div class="menu-container">
+        <div class="results-container">
+          <h2 id="resultsTitle">🎉 Congratulations! 🎉</h2>
+          <p id="resultsSubtitle">You protected the wizard!</p>
+
+          <div class="results-stats">
+            <h3>📊 Your Results:</h3>
+            <ul id="resultsList">
+              <li>
+                Characters typed: <span id="finalCharactersTyped">0</span>
+              </li>
+              <li>Mistakes: <span id="finalMistakes">0</span></li>
+              <li>Final WPM: <span id="finalWPM">0</span></li>
+              <li>Time taken: <span id="finalTime">0</span> seconds</li>
+            </ul>
+          </div>
+
+          <div class="menu-buttons">
+            <button id="tryAgainBtn" class="btn btn-primary">Try Again</button>
+            <button id="resultsMenuBtn" class="btn btn-secondary">
+              Main Menu
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fullscreen Toggle Button -->
+      <button
+        id="fullscreenToggleResults"
+        class="fullscreen-btn"
+        title="Toggle Fullscreen"
+      >
+        <span class="fullscreen-icon">⛶</span>
+      </button>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/config.js"></script>
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/utils/math.js"></script>
+    <script src="js/utils/fullscreen.js"></script>
+    <script src="js/gameState.js"></script>
+    <script src="js/menu/combobox.js"></script>
+    <script src="js/menu/validation.js"></script>
+    <script src="js/menu/mainMenu.js"></script>
+    <script src="js/menu/statistics.js"></script>
+    <script src="js/graphics/renderer.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

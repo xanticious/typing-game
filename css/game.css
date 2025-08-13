@@ -1,0 +1,374 @@
+/* Game CSS - Game arena specific styles */
+
+/* Game Arena Layout */
+#gameArena {
+  background: radial-gradient(circle at center, #2d1b4e, #1a0033);
+  padding: 0;
+}
+
+.game-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Game UI Overlay */
+.game-ui {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.game-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: 2px solid #d4af37;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.game-stats span {
+  color: #d4af37;
+}
+
+/* Canvas Styling */
+#gameCanvas {
+  display: block;
+  border: 3px solid #d4af37;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+  background: radial-gradient(circle at center, #4a2c7a, #2d1b4e);
+  max-width: 90vw;
+  max-height: 80vh;
+}
+
+/* Typing Feedback Overlay */
+.typing-feedback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  pointer-events: none;
+  font-size: 2em;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.typing-feedback.show {
+  opacity: 1;
+}
+
+.typing-feedback.correct {
+  color: #00ff00;
+}
+
+.typing-feedback.incorrect {
+  color: #ff0000;
+}
+
+/* Penalty Overlay */
+.penalty-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 0, 0, 0.2);
+  z-index: 15;
+  display: none;
+  animation: penaltyPulse 0.5s ease-in-out;
+}
+
+.penalty-overlay.active {
+  display: block;
+}
+
+@keyframes penaltyPulse {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Game Elements (for HTML-based elements if needed) */
+.wizard-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  font-size: 3em;
+  animation: wizardGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes wizardGlow {
+  0% {
+    text-shadow: 0 0 10px #d4af37, 0 0 20px #d4af37, 0 0 30px #d4af37;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    text-shadow: 0 0 20px #d4af37, 0 0 30px #d4af37, 0 0 40px #d4af37;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+/* Current Letter Highlight */
+.current-letter-display {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  border: 3px solid #ffff00;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5em;
+  font-weight: bold;
+  color: #ffff00;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  z-index: 10;
+  animation: targetPulse 1.5s ease-in-out infinite;
+}
+
+/* Fullscreen Toggle Button */
+.fullscreen-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid var(--primary-gold);
+  border-radius: 8px;
+  color: var(--primary-gold);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.fullscreen-btn:hover {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: var(--secondary-gold);
+  color: var(--secondary-gold);
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+
+.fullscreen-btn:active {
+  transform: scale(0.95);
+}
+
+.fullscreen-btn:focus {
+  outline: 2px solid var(--highlight-yellow);
+  outline-offset: 2px;
+}
+
+.fullscreen-icon {
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.fullscreen-btn.fullscreen-active .fullscreen-icon {
+  transform: rotate(45deg);
+}
+
+@keyframes targetPulse {
+  0% {
+    box-shadow: 0 0 10px #ffff00;
+    transform: translateX(-50%) scale(1);
+  }
+  100% {
+    box-shadow: 0 0 20px #ffff00, 0 0 30px #ffff00;
+    transform: translateX(-50%) scale(1.1);
+  }
+}
+
+/* Responsive Game Layout */
+@media (max-width: 768px) {
+  .game-stats {
+    flex-direction: column;
+    gap: 5px;
+    font-size: 14px;
+    padding: 8px 15px;
+  }
+
+  #gameCanvas {
+    max-width: 95vw;
+    max-height: 70vh;
+  }
+
+  .current-letter-display {
+    width: 60px;
+    height: 60px;
+    font-size: 2em;
+    bottom: 30px;
+  }
+
+  .typing-feedback {
+    font-size: 1.5em;
+  }
+}
+
+/* Game Pause Overlay */
+.game-paused {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 25;
+  display: none;
+}
+
+.game-paused.active {
+  display: flex;
+}
+
+.pause-content {
+  text-align: center;
+  color: #ffffff;
+}
+
+.pause-content h2 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  color: #d4af37;
+}
+
+.pause-content p {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+}
+
+/* Game Progress Indicator */
+.progress-bar {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d4af37, #f4d03f);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+/* Victory/Defeat Visual Effects */
+.victory-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(0, 255, 0, 0.3), transparent);
+  animation: victoryFlash 1s ease-in-out;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.defeat-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 0, 0, 0.3), transparent);
+  animation: defeatFlash 1s ease-in-out;
+  z-index: 20;
+  pointer-events: none;
+}
+
+@keyframes victoryFlash {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes defeatFlash {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Fullscreen Mode Adjustments */
+:fullscreen #gameArena,
+:-webkit-full-screen #gameArena,
+:-moz-full-screen #gameArena,
+:-ms-fullscreen #gameArena {
+  padding: 0;
+}
+
+:fullscreen .game-container,
+:-webkit-full-screen .game-container,
+:-moz-full-screen .game-container,
+:-ms-fullscreen .game-container {
+  width: 100vw;
+  height: 100vh;
+}
+
+:fullscreen #gameCanvas,
+:-webkit-full-screen #gameCanvas,
+:-moz-full-screen #gameCanvas,
+:-ms-fullscreen #gameCanvas {
+  max-width: 100vw;
+  max-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+}
+
+:fullscreen .fullscreen-btn,
+:-webkit-full-screen .fullscreen-btn,
+:-moz-full-screen .fullscreen-btn,
+:-ms-fullscreen .fullscreen-btn {
+  bottom: 30px;
+  right: 30px;
+}
