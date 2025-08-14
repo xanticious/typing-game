@@ -4,7 +4,9 @@ class SnakeProtectorGame {
   constructor() {
     this.isInitialized = false;
     this.renderer = null;
+    this.gameEngine = null;
     this.animationId = null;
+    this.lastTimestamp = 0;
 
     this.initializeApplication();
   }
@@ -25,6 +27,9 @@ class SnakeProtectorGame {
     try {
       // Initialize renderer for game canvas
       this.renderer = new Renderer("gameCanvas");
+
+      // Initialize game engine
+      this.gameEngine = new GameEngine(this.renderer);
 
       // Setup initial game state
       gameState.setState("MENU");
@@ -126,7 +131,8 @@ class SnakeProtectorGame {
   }
 
   handleGameKeys(e) {
-    // Handle game controls
+    // Game input is handled by the GameEngine's InputHandler
+    // Only handle special keys here
     switch (e.key) {
       case "Escape":
         e.preventDefault();
@@ -135,14 +141,14 @@ class SnakeProtectorGame {
       case "F11":
         // Allow fullscreen toggle
         break;
-      default:
-        // Handle typing input
-        if (Helpers.isValidGameKey(e.key)) {
-          e.preventDefault();
-          gameState.handleGameInput(e.key);
-        }
+      case "p":
+      case "P":
+        if (e.ctrlKey || e.metaKey) break; // Allow Ctrl+P for printing
+        e.preventDefault();
+        this.togglePause();
         break;
     }
+    // Note: Typing input is handled by GameEngine's InputHandler
   }
 
   handleStatisticsKeys(e) {
@@ -182,152 +188,80 @@ class SnakeProtectorGame {
   }
 
   updateAndRender(timestamp) {
-    if (!this.renderer || gameState.currentState !== "GAME") {
-      return;
-    }
+    // Calculate delta time
+    const deltaTime = this.lastTimestamp
+      ? (timestamp - this.lastTimestamp) / 1000
+      : 0;
+    this.lastTimestamp = timestamp;
 
-    // Clear canvas
+    // Update and render based on current state
+    switch (gameState.currentState) {
+      case "GAME":
+        if (this.gameEngine) {
+          this.gameEngine.update(deltaTime);
+          this.gameEngine.render();
+        } else {
+          console.log("No game engine available in GAME state");
+        }
+        break;
+      case "MENU":
+      case "STATISTICS":
+      case "RESULTS":
+        // Render background effects for menus
+        this.renderMenuBackground();
+        break;
+    }
+  }
+
+  renderMenuBackground() {
+    if (!this.renderer) return;
+
+    // Clear canvas and draw subtle background effects
     this.renderer.clear();
 
-    // Draw spiral path
-    this.renderer.drawSpiral(
-      this.renderer.centerX,
-      this.renderer.centerY,
-      CONFIG.GAME.SPIRAL_START_RADIUS,
-      CONFIG.GAME.SPIRAL_END_RADIUS,
-      CONFIG.GAME.SPIRAL_TURNS * Math.PI * 2
-    );
-
-    // Draw wizard in center
-    this.renderer.drawWizard(
-      this.renderer.centerX,
-      this.renderer.centerY,
-      timestamp
-    );
-
-    // Draw snake if game is active
-    if (gameState.currentGameData) {
-      this.renderSnake(timestamp);
-    }
+    // Add some magical particle effects or gradient background
+    this.renderer.drawMagicalBackground();
   }
 
-  renderSnake(timestamp) {
-    const gameData = gameState.currentGameData;
-    if (!gameData || !gameData.snakeLetters) return;
-
-    const { snakeLetters, currentLetterIndex } = gameData;
-    const segments = this.calculateSnakePositions(timestamp);
-
-    // Draw snake tail
-    if (segments.length > 1) {
-      this.renderer.drawSnakeTail(segments);
+  // Game Control Methods
+  startGame(gameConfig) {
+    console.log("Starting game from main application");
+    if (this.gameEngine) {
+      this.gameEngine.startGame(gameConfig);
     }
-
-    // Draw snake segments
-    segments.forEach((segment, index) => {
-      if (index < snakeLetters.length) {
-        const letter = snakeLetters[index];
-        const isActive = index === currentLetterIndex;
-
-        this.renderer.drawSnakeSegment(
-          segment.x,
-          segment.y,
-          letter,
-          isActive,
-          CONFIG.GAME.SEGMENT_RADIUS
-        );
-      }
-    });
-
-    // Draw snake head
-    if (segments.length > 0) {
-      const headSegment = segments[0];
-      this.renderer.drawSnakeHead(
-        headSegment.x,
-        headSegment.y,
-        headSegment.angle,
-        CONFIG.GAME.HEAD_SIZE
-      );
-    }
-  }
-
-  calculateSnakePositions(timestamp) {
-    const gameData = gameState.currentGameData;
-    if (!gameData) return [];
-
-    // Calculate snake progress along spiral
-    const elapsedSeconds =
-      (timestamp - (gameData.renderStartTime || timestamp)) / 1000;
-    const totalDuration = gameData.durationSeconds;
-    const progress = Math.min(elapsedSeconds / totalDuration, 1);
-
-    // Calculate positions for each segment
-    const positions = [];
-    const segmentCount = gameData.snakeLetters.length;
-
-    for (let i = 0; i < segmentCount; i++) {
-      const segmentProgress = Math.max(0, progress - i * 0.02); // Spacing between segments
-
-      const spiralPos = MathUtils.spiralPosition(
-        this.renderer.centerX,
-        this.renderer.centerY,
-        CONFIG.GAME.SPIRAL_START_RADIUS,
-        CONFIG.GAME.SPIRAL_END_RADIUS,
-        CONFIG.GAME.SPIRAL_TURNS * Math.PI * 2,
-        segmentProgress
-      );
-
-      positions.push(spiralPos);
-    }
-
-    // Initialize render start time
-    if (!gameData.renderStartTime) {
-      gameData.renderStartTime = timestamp;
-    }
-
-    return positions;
   }
 
   pauseGame() {
-    if (gameState.currentState === "GAME" && gameState.currentGameData) {
-      gameState.currentGameData.isPaused = true;
-
-      // Show pause overlay
-      const pauseOverlay = document.createElement("div");
-      pauseOverlay.id = "pauseOverlay";
-      pauseOverlay.className = "game-paused active";
-      pauseOverlay.innerHTML = `
-                <div class="pause-content">
-                    <h2>⏸️ Game Paused</h2>
-                    <p>Press any key to continue</p>
-                </div>
-            `;
-
-      document.getElementById("gameArena").appendChild(pauseOverlay);
-
-      // Resume on any key press
-      const resumeHandler = (e) => {
-        e.preventDefault();
-        this.resumeGame();
-        document.removeEventListener("keydown", resumeHandler);
-      };
-
-      document.addEventListener("keydown", resumeHandler);
+    if (this.gameEngine && gameState.currentState === "GAME") {
+      this.gameEngine.pauseGame();
+      console.log("Game paused");
     }
   }
 
   resumeGame() {
-    if (gameState.currentState === "GAME" && gameState.currentGameData) {
-      gameState.currentGameData.isPaused = false;
+    if (this.gameEngine && gameState.currentState === "GAME") {
+      this.gameEngine.resumeGame();
+      console.log("Game resumed");
+    }
+  }
 
-      // Remove pause overlay
-      const pauseOverlay = document.getElementById("pauseOverlay");
-      if (pauseOverlay) {
-        pauseOverlay.remove();
+  togglePause() {
+    if (this.gameEngine && gameState.currentState === "GAME") {
+      if (this.gameEngine.isPaused) {
+        this.resumeGame();
+      } else {
+        this.pauseGame();
       }
     }
   }
 
+  stopGame() {
+    if (this.gameEngine) {
+      this.gameEngine.stopGame();
+    }
+  }
+
+  // Particle Effects
   createMagicalParticles() {
     // Create floating magical particles in the background
     const particlesContainer = document.createElement("div");
@@ -381,11 +315,11 @@ class SnakeProtectorGame {
 }
 
 // Initialize the game
-const game = new SnakeProtectorGame();
+const snakeProtectorGame = new SnakeProtectorGame();
 
-// Export for debugging
+// Export for debugging and access by other modules
 if (typeof window !== "undefined") {
-  window.game = game;
+  window.snakeProtectorGame = snakeProtectorGame;
   window.gameState = gameState;
   window.CONFIG = CONFIG;
 }

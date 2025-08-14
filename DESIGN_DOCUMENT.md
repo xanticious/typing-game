@@ -8,8 +8,8 @@
 
 ### Theme: Fantasy Wizard vs. Basilisk
 
-- **Setting**: Mystical arena with spiral pathways
-- **Protagonist**: Wizard in the center with animated wand casting protective spells
+- **Setting**: Mystical arena with zigzag pathways (Zuma-style)
+- **Protagonist**: Wizard at the bottom center with animated wand casting protective spells
 - **Antagonist**: Magical Basilisk snake with ornate design
 - **Color Palette**: Rich fantasy colors - deep purples, golds, emerald greens
 - **Highlight Color**: Bright yellow for active typing targets
@@ -20,20 +20,20 @@
 - **Snake Head**: Detailed basilisk head with glowing eyes
 - **Body Segments**: Circular segments containing upright letters/characters
 - **Tail**: Decorative flowing tail for visual appeal
-- **Wizard**: Central character with wand animation
-- **Background**: Spiral pathway with subtle magical ambiance
+- **Wizard**: Bottom center character with wand animation
+- **Background**: Zigzag pathway with switchbacks in triangular constraint, magical ambiance
 - **UI Overlays**: Translucent effects for penalties and feedback
 
 ## 🎮 Game Mechanics
 
 ### Core Gameplay Loop
 
-1. Snake spawns at spiral edge with generated letter sequence
+1. Snake spawns at the top start of the zigzag path with generated letter sequence
 2. Player types the highlighted (yellow) front body segment letter
-3. **Correct Input**: Segment disappears, head slides back, snake continues
+3. **Correct Input**: Segment disappears, head slides back, snake continues along path
 4. **Incorrect Input**: 0.5 second typing lockout with visual penalty
-5. **Victory**: All segments destroyed before reaching center
-6. **Defeat**: Snake reaches the wizard in the center
+5. **Victory**: All segments destroyed before reaching the wizard at bottom center
+6. **Defeat**: Snake reaches the wizard at the bottom center
 
 ### Input System
 
@@ -44,9 +44,11 @@
 
 ### Movement System
 
-- **Path**: Mathematical spiral from edge to center
+- **Path**: Configurable zigzag switchbacks from top to bottom center
+- **Layout**: Triangular constraint with wizard at bottom apex
 - **Speed**: Calculated based on difficulty setting and time duration
 - **Length**: Determined by character set selections and time setting
+- **Direction**: Follows switchback pattern with smooth corner transitions
 
 ## 🎛️ Main Menu Configuration
 
@@ -175,19 +177,32 @@ You protected the wizard!
 
 ### Mathematical Calculations
 
-#### Spiral Path
+#### Zigzag Path System
 
 ```javascript
-// Parametric spiral equation
-x = centerX + radius * cos(angle) * spiralFactor;
-y = centerY + radius * sin(angle) * spiralFactor;
-// Where spiralFactor decreases as angle increases
+// Configurable zigzag path with switchbacks
+class ZigzagPath {
+  constructor(canvasWidth, canvasHeight, levels = 6) {
+    this.width = canvasWidth;
+    this.height = canvasHeight;
+    this.levels = levels;
+    this.wizardX = canvasWidth / 2;
+    this.wizardY = canvasHeight * 0.9; // Bottom center
+    this.generatePathSegments();
+  }
+
+  generatePathSegments() {
+    // Create triangular constraint with switchbacks
+    // Each level gets progressively narrower
+    // Smooth corners at direction changes
+  }
+}
 ```
 
 #### Snake Speed Calculation
 
 ```javascript
-speed = (spiral_length / time_duration) * difficulty_multiplier;
+speed = (total_path_length / time_duration) * difficulty_multiplier;
 snake_length = character_pool_size * time_factor;
 ```
 

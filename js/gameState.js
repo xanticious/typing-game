@@ -67,6 +67,12 @@ class GameState {
     this.updateBestScoreDisplay();
   }
 
+  // Configuration Management
+  updateConfig(newConfig) {
+    console.log("GameState: Updating config:", newConfig);
+    this.gameConfig = { ...newConfig };
+  }
+
   getConfigHash() {
     const { characterSets, difficulty, duration } = this.gameConfig;
     const enabledSets = Object.keys(characterSets)
@@ -169,6 +175,9 @@ class GameState {
 
   // Game Management
   initializeGame() {
+    console.log("GameState: Initializing game with config:", this.gameConfig);
+
+    // Validate configuration
     const characterPool = this.generateCharacterPool();
     if (characterPool.length === 0) {
       console.error("No character pool available");
@@ -176,121 +185,68 @@ class GameState {
       return;
     }
 
-    const durationSeconds =
-      CONFIG.DURATION_SETTINGS[this.gameConfig.duration].seconds;
-    const difficultyMultiplier =
-      CONFIG.DIFFICULTY_SETTINGS[this.gameConfig.difficulty].multiplier;
+    // Start the game through the main application's game engine
+    if (window.snakeProtectorGame && window.snakeProtectorGame.gameEngine) {
+      window.snakeProtectorGame.startGame(this.gameConfig);
+    } else {
+      console.error("Game engine not available");
+      this.setState("MENU");
+    }
+  }
 
-    // Calculate snake length based on duration and difficulty
-    const baseLettersPerSecond = 1.5; // Baseline letters per second
-    const snakeLength = Math.max(
-      5,
-      Math.floor(durationSeconds * baseLettersPerSecond * difficultyMultiplier)
-    );
+  // Show results from game engine
+  showResults(results) {
+    console.log("GameState: Showing results:", results);
 
-    // Generate random letters for the snake
-    const snakeLetters = [];
-    for (let i = 0; i < snakeLength; i++) {
-      const randomIndex = Math.floor(Math.random() * characterPool.length);
-      snakeLetters.push(characterPool[randomIndex]);
+    // Store the results for display
+    this.currentGameResults = results;
+
+    // Record score in session statistics
+    this.recordScore(results);
+
+    // Switch to results screen
+    this.setState("RESULTS");
+  }
+
+  // Display final results on results screen
+  displayResults() {
+    if (!this.currentGameResults) {
+      console.error("No results to display");
+      return;
     }
 
-    this.currentGameData = {
-      snakeLetters,
-      currentLetterIndex: 0,
-      startTime: Date.now(),
-      charactersTyped: 0,
-      mistakes: 0,
-      durationSeconds,
-      difficultyMultiplier,
-      isComplete: false,
-      isPenalized: false,
-    };
+    const results = this.currentGameResults;
 
-    // Initialize game UI
-    this.updateGameUI();
-  }
+    // Update result title and subtitle based on game outcome
+    const titleElement = document.getElementById("resultsTitle");
+    const subtitleElement = document.getElementById("resultsSubtitle");
 
-  updateGameUI() {
-    if (!this.currentGameData) return;
+    if (titleElement && subtitleElement) {
+      if (results.reason === "victory") {
+        titleElement.textContent = "🎉 Congratulations! 🎉";
+        subtitleElement.textContent = "You protected the wizard!";
+      } else if (results.reason === "defeat") {
+        titleElement.textContent =
+          "💀 Ouch! The basilisk reached the wizard! 💀";
+        subtitleElement.textContent = "Better luck next time!";
+      } else {
+        titleElement.textContent = "⏰ Time's Up! ⏰";
+        subtitleElement.textContent = "The game has ended.";
+      }
+    }
 
-    const { charactersTyped, mistakes, snakeLetters, currentLetterIndex } =
-      this.currentGameData;
+    // Update result statistics
+    const charactersElement = document.getElementById("finalCharactersTyped");
+    const mistakesElement = document.getElementById("finalMistakes");
+    const wpmElement = document.getElementById("finalWPM");
+    const timeElement = document.getElementById("finalTime");
 
-    // Calculate current WPM
-    const elapsedMinutes =
-      (Date.now() - this.currentGameData.startTime) / 60000;
-    const currentWPM =
-      elapsedMinutes > 0
-        ? Math.round(
-            charactersTyped / CONFIG.GAME.CHARS_PER_WORD / elapsedMinutes
-          )
-        : 0;
-
-    // Update UI elements
-    const wpmElement = document.getElementById("currentWPM");
-    const mistakesElement = document.getElementById("currentMistakes");
-    const lettersLeftElement = document.getElementById("lettersLeft");
-
-    if (wpmElement) wpmElement.textContent = currentWPM;
-    if (mistakesElement) mistakesElement.textContent = mistakes;
-    if (lettersLeftElement)
-      lettersLeftElement.textContent = snakeLetters.length - currentLetterIndex;
-  }
-
-  displayResults() {
-    if (!this.currentGameData) return;
-
-    const {
-      charactersTyped,
-      mistakes,
-      startTime,
-      durationSeconds,
-      snakeLetters,
-      currentLetterIndex,
-    } = this.currentGameData;
-
-    // Calculate final stats
-    const elapsedSeconds = (Date.now() - startTime) / 1000;
-    const elapsedMinutes = elapsedSeconds / 60;
-    const baseWPM =
-      elapsedMinutes > 0
-        ? Math.round(
-            charactersTyped / CONFIG.GAME.CHARS_PER_WORD / elapsedMinutes
-          )
-        : 0;
-    const finalWPM = Math.max(
-      0,
-      baseWPM - mistakes * CONFIG.GAME.MISTAKE_PENALTY
-    );
-
-    const gameResult = {
-      charactersTyped,
-      mistakes,
-      finalWPM,
-      elapsedSeconds: Math.round(elapsedSeconds),
-      isVictory: currentLetterIndex >= snakeLetters.length,
-    };
-
-    // Record the score
-    this.recordScore(gameResult);
-
-    // Update results display
-    const isVictory = gameResult.isVictory;
-
-    document.getElementById("resultsTitle").textContent = isVictory
-      ? "🎉 Congratulations! 🎉"
-      : "💀 Ouch! The basilisk reached the wizard! 💀";
-    document.getElementById("resultsSubtitle").textContent = isVictory
-      ? "You protected the wizard!"
-      : "Better luck next time!";
-
-    document.getElementById("finalCharactersTyped").textContent =
-      charactersTyped;
-    document.getElementById("finalMistakes").textContent = mistakes;
-    document.getElementById("finalWPM").textContent = finalWPM;
-    document.getElementById("finalTime").textContent =
-      gameResult.elapsedSeconds;
+    if (charactersElement)
+      charactersElement.textContent = results.charactersTyped || 0;
+    if (mistakesElement) mistakesElement.textContent = results.mistakes || 0;
+    if (wpmElement)
+      wpmElement.textContent = results.finalScore || results.finalWPM || 0;
+    if (timeElement) timeElement.textContent = results.elapsedTime || 0;
   }
 
   // Event Listeners

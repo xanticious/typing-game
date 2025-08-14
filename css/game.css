@@ -11,6 +11,9 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Game UI Overlay */
@@ -44,12 +47,13 @@
 /* Canvas Styling */
 #gameCanvas {
   display: block;
+  width: 800px !important;
+  height: 600px !important;
   border: 3px solid #d4af37;
   border-radius: 10px;
   box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
   background: radial-gradient(circle at center, #4a2c7a, #2d1b4e);
-  max-width: 90vw;
-  max-height: 80vh;
+  margin: 0 auto;
 }
 
 /* Typing Feedback Overlay */
@@ -77,6 +81,47 @@
 
 .typing-feedback.incorrect {
   color: #ff0000;
+}
+
+/* Feedback Messages */
+.feedback-correct {
+  color: #00ff00;
+  text-shadow: 0 0 10px #00ff00;
+  animation: feedbackPop 1s ease-out;
+}
+
+.feedback-incorrect {
+  color: #ff0000;
+  text-shadow: 0 0 10px #ff0000;
+  animation: feedbackShake 0.5s ease-out;
+}
+
+@keyframes feedbackPop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes feedbackShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
 }
 
 /* Penalty Overlay */

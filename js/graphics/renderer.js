@@ -24,6 +24,7 @@ class Renderer {
 
     // Get the size from CSS
     const rect = this.canvas.getBoundingClientRect();
+    console.log("Canvas getBoundingClientRect:", rect);
 
     // Set actual size in memory (scaled for DPI)
     this.canvas.width = rect.width * ratio;
@@ -32,6 +33,14 @@ class Renderer {
     // Scale CSS size back down
     this.canvas.style.width = rect.width + "px";
     this.canvas.style.height = rect.height + "px";
+
+    console.log("Canvas dimensions set:", {
+      actualWidth: this.canvas.width,
+      actualHeight: this.canvas.height,
+      displayWidth: rect.width,
+      displayHeight: rect.height,
+      ratio: ratio,
+    });
 
     // Scale the drawing context
     ctx.scale(ratio, ratio);
@@ -67,6 +76,38 @@ class Renderer {
 
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(0, 0, this.displayWidth, this.displayHeight);
+  }
+
+  resize() {
+    // Force canvas to proper dimensions
+    console.log("Forcing canvas to 800x600");
+    this.displayWidth = 800;
+    this.displayHeight = 600;
+
+    const pixelRatio = window.devicePixelRatio || 1;
+    this.canvas.width = this.displayWidth * pixelRatio;
+    this.canvas.height = this.displayHeight * pixelRatio;
+    this.canvas.style.width = this.displayWidth + "px";
+    this.canvas.style.height = this.displayHeight + "px";
+
+    this.ctx.scale(pixelRatio, pixelRatio);
+
+    // Update cached values
+    this.width = this.canvas.width;
+    this.height = this.canvas.height;
+    this.centerX = this.displayWidth / 2;
+    this.centerY = this.displayHeight / 2;
+
+    console.log(
+      "Canvas resized to:",
+      this.displayWidth,
+      "x",
+      this.displayHeight,
+      "Actual canvas size:",
+      this.canvas.width,
+      "x",
+      this.canvas.height
+    );
   }
 
   drawSpiral(
@@ -309,15 +350,6 @@ class Renderer {
     this.ctx.restore();
   }
 
-  // Utility methods
-  resize() {
-    this.ctx = this.setupHighDPICanvas();
-    this.width = this.canvas.width;
-    this.height = this.canvas.height;
-    this.centerX = this.displayWidth / 2;
-    this.centerY = this.displayHeight / 2;
-  }
-
   // Effect methods
   fadeIn(duration = 1000) {
     const startTime = Date.now();
@@ -346,6 +378,33 @@ class Renderer {
     setTimeout(() => {
       // Flash effect will be cleared on next render
     }, duration);
+  }
+
+  // Magical background for menu screens
+  drawMagicalBackground() {
+    // Draw subtle magical effects for menu backgrounds
+    this.drawBackground();
+
+    // Add floating orbs
+    const time = Date.now() / 1000;
+    this.ctx.globalAlpha = 0.3;
+
+    for (let i = 0; i < 5; i++) {
+      const x = (Math.sin(time * 0.5 + i) * 0.3 + 0.5) * this.displayWidth;
+      const y = (Math.cos(time * 0.3 + i) * 0.4 + 0.5) * this.displayHeight;
+      const radius = 20 + Math.sin(time + i) * 10;
+
+      const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, radius);
+      gradient.addColorStop(0, "#FFD700");
+      gradient.addColorStop(1, "transparent");
+
+      this.ctx.fillStyle = gradient;
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    this.ctx.globalAlpha = 1.0;
   }
 
   shake(intensity = 5, duration = 300) {
